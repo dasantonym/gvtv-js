@@ -1,4 +1,5 @@
 .idea
 jquery.js
 require.js
+db
 !.gitkeep
