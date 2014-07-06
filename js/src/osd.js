@@ -3,7 +3,8 @@ define(function () {
         osdConfig : {
             channelNumber : 0,
             autoVisible : false,
-            autoMultiplier : 1
+            autoMultiplier : 1,
+            padLength: 1
         },
         osdTimeout : -1,
         showOSD : function (timeout) {
@@ -27,7 +28,7 @@ define(function () {
         },
         padChannelDisplay : function (num) {
             var numStr = num.toString();
-            while (numStr.length < gvtvData.availableChannels.toString().length) {
+            while (numStr.length < s.osdConfig.padLength) {
                 numStr = '0'+numStr;
             }
             return numStr;

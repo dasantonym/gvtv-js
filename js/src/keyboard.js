@@ -1,6 +1,6 @@
 define(function () {
     var s = {
-        registerKeys : function () {
+        registerKeys : function (GVTV) {
             document.onkeydown = function (e) {
                 var reg = /^\d+$/;
                 var input = s.getChar(e.keyCode || e.charCode);

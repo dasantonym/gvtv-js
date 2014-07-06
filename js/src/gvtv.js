@@ -13,7 +13,7 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
         init : function () {
             s.osd = osd;
             s.keyboard = keyboard;
-            s.keyboard.registerKeys();
+            s.keyboard.registerKeys(s);
 
             s.data = data;
             s.data.getChannels(function (err) {
@@ -29,8 +29,8 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
         channelNumberInput: function (input) {
             s.killAutoTimer();
 
-            if (!osd.isOSDVisible()) {
-                osd.showOSD();
+            if (!s.osd.isOSDVisible()) {
+                s.osd.showOSD();
                 s.currentInput = '00000000';
             }
 
@@ -40,10 +40,11 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
             }
             s.keyTimeout = window.setTimeout(function () { s.setChannel(); },2000);
             s.currentInput += input;
-            s.currentInput = GVTV.currentInput.substr(s.currentInput.length-8);
+            s.currentInput = s.currentInput.substr(s.currentInput.length-8);
 
-            osd.updateOSD({
+            s.osd.updateOSD({
                 channelNumber : parseInt(s.currentInput),
+                padLength : s.data.availableChannels.toString().length,
                 channelInfo : ''
             });
 
@@ -135,6 +136,7 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
                 }
                 s.osd.updateOSD({
                     channelNumber : s.currentChannel,
+                    padLength : s.data.availableChannels.toString().length,
                     autoVisible : false
                 });
                 s.osd.showOSD(4000);
