@@ -3,18 +3,22 @@ define(function () {
         registerKeys : function (callback) {
             document.onkeydown = function (e) {
                 var reg = /^\d+$/;
-                var input = s.getChar(e.keyCode || e.charCode);
-                if (reg.test(input)) {
-                    callback(input);
-                } else if (input.toLowerCase() === 'q') {
+                var input = e.keyCode || e.charCode;
+                if (reg.test(s.getChar(input))) {
+                    callback(s.getChar(input));
+                } else if (input === 39) {
                     callback('+');
-                } else if (input.toLowerCase() === 'a') {
+                } else if (input === 37) {
                     callback('-');
-                } else if (input.toLowerCase() === 'w') {
+                } else if (input === 38) {
                     callback('up');
-                } else if (input.toLowerCase() === 's') {
+                } else if (input === 40) {
                     callback('down');
-                }
+                } else if (s.getChar(input).toLowerCase() === 'x') {
+                    callback('x');
+                } else if (s.getChar(input).toLowerCase() === 'y') {
+                   callback('y');
+               }
             }
         },
         getChar : function (keycode) {

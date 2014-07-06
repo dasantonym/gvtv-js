@@ -1,32 +1,30 @@
 define(function () {
     var s = {
         config : {
+            targetIndex : 0,
             channelNumber : 0,
             autoVisible : false,
-            autoMultiplier : 1
+            autoMultiplier : 1,
+            displayTime : 4000
         },
         padLength : 1,
         timeout : -1,
-        show : function (timeout) {
-            if (typeof timeout==='undefined') timeout = 2000;
+        show : function () {
+            var target = s.getTarget();
             if (s.timeout > -1) {
                 window.clearTimeout(s.timeout);
                 s.timeout = -1;
             }
             s.timeout = window.setTimeout(function () {
-                s.hide();
-            }, timeout);
-            document.getElementById('osd').style.display='block';
+                s.hide(target);
+            }, s.config.displayTime ? s.config.displayTime : 2000);
         },
-        hide : function () {
+        hide : function (target) {
             if (s.timeout > -1) {
                 window.clearTimeout(s.timeout);
                 s.timeout = -1;
             }
-            document.getElementById('osd').style.display='none';
-        },
-        isVisible : function () {
-            return document.getElementById('osd').style.display==='block';
+            target.innerHTML = '';
         },
         padChannelDisplay : function (num) {
             var numStr = num.toString();
@@ -36,16 +34,21 @@ define(function () {
             return numStr;
         },
         update : function (osdConfig) {
+            s.getTarget().innerHTML = '';
             s.config = osdConfig;
-            if (typeof s.config.channelNumber != 'undefined') {
-                document.getElementById('channelnum').innerHTML = s.padChannelDisplay(s.config.channelNumber);
+            var osdCode = '<div class="channelnum">' + ( s.config.channelNumber ? s.config.channelNumber : '' ) + '</div>';
+            console.log(s.config);
+            if (s.config.autoVisible==true) {
+                osdCode += '<div class="auto">Random ' + ( s.config.autoMultiplier && s.config.autoMultiplier > 0 ? (s.config.autoMultiplier/2).toFixed(1) + 's' : 'off' ) + '</div>';
             }
-            if (typeof s.config.autoMultiplier != 'undefined') {
-                document.getElementById('automulti').innerHTML = s.config.autoMultiplier.toString();
+            s.getTarget().innerHTML = osdCode;
+            s.show();
+        },
+        getTarget : function (target) {
+            if (!target) {
+                target = s.config.targetIndex;
             }
-            if (typeof s.config.autoVisible != 'undefined') {
-                document.getElementById('auto').style.display = s.config.autoVisible ? 'block' : 'none';
-            }
+            return document.getElementById('display_' + target).getElementsByClassName('osd')[0];
         }
     };
     return s;

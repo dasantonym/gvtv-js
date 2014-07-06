@@ -1,30 +1,58 @@
-define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSource) {
+define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, osd, dataSource, util) {
     var s = {
+        targetDivId : 'gvtv',
+        gridSize: {
+            x: 1,
+            y: 1
+        },
         currentChannel: 1,
         currentInput : '',
         keyTimeout : -1,
         autoTimer : -1,
-        autoBaseDelay : 1000,
-        autoDelayMultiply: 3,
+        autoBaseDelay : 500,
+        autoDelayMultiply: 5,
+        displays : 0,
+        displayIndex : 0,
+        randomContentTargets: [],
         randomChannels : [],
         init : function () {
+            document.getElementById(s.targetDivId).innerHTML = '<div id="content-wrapper"></div><div id="menu-wrapper"></div>';
             s.updateChannels(function (err) {
                 if (err) return;
                 s.currentChannel = Math.round(Math.random() * (dataSource.available - 1)) + 1;
-                s.setChannel();
-                s.autoChannel(1, false);
-                keyboard.registerKeys(s.channelCommand);
+                s.buildDisplays(function () {
+                    s.autoChannel(1, false);
+                    keyboard.registerKeys(s.channelCommand);
+                });
             });
+        },
+        buildDisplays : function (callback) {
+            s.displays = s.gridSize.x * s.gridSize.y;
+            var cellSizeX = (100.0/ s.gridSize.x).toFixed(2),
+                cellSizeY = (100.0/ s.gridSize.y).toFixed(2),
+                css = 'width:' + cellSizeX + '%;height:' + cellSizeY + '%;',
+                fontSizeCss = 'font-size:' + (4.0 / (s.gridSize.x > s.gridSize.y ? s.gridSize.x : s.gridSize.y)).toFixed(2) + 'em;';
+                displayCode = '',
+                i = 0;
+            for (var y = 0; y < s.gridSize.y; y += 1) {
+                for (var x = 0; x < s.gridSize.x; x += 1) {
+                    var positionCss = 'left:' + cellSizeX*x + '%;' + 'top:' + cellSizeY*y + '%;'
+                    displayCode += '<div id="display_' + i + '" style="' + css + fontSizeCss + positionCss + '" class="display"><div class="content"></div><div class="osd"></div></div>';
+                    i += 1;
+                }
+            }
+            document.getElementById('content-wrapper').innerHTML = displayCode;
+            s.randomContentTargets = util.randomIntegerArray(s.displays, 0);
+            s.setChannel();
+            if (callback) callback();
         },
         channelNumberInput: function (input) {
             var displayLength = dataSource.available.toString().length;
 
             s.stopAutoTimer();
 
-            if (!osd.isVisible()) {
-                osd.show();
-                s.currentInput = '00000000';
-            }
+            osd.show();
+            s.currentInput = '';
 
             if (s.keyTimeout>-1) {
                 window.clearTimeout(s.keyTimeout);
@@ -39,6 +67,7 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
             }
 
             osd.update({
+                targetIndex: s.displayIndex,
                 channelNumber : parseInt(s.currentInput)
             });
 
@@ -54,6 +83,14 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
                 s.autoChannel(1, true);
             } else if (input==='-') {
                 s.autoChannel(-1, true);
+            } else if (input==='x') {
+                s.gridSize.x += 1;
+                if (s.gridSize.x > 8) s.gridSize.x = 1;
+                s.buildDisplays();
+            } else if (input==='y') {
+                s.gridSize.y += 1;
+                if (s.gridSize.y > 8) s.gridSize.y = 1;
+                s.buildDisplays();
             } else {
                 s.stopAutoTimer();
                 s.channelNumberInput(input);
@@ -82,15 +119,20 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
                 s.autoDelayMultiply = 0;
             }
 
+            console.log(s.autoDelayMultiply, autoVisible, delta);
+
             osd.update({
+                targetIndex: s.displayIndex,
+                channelNumber : s.currentChannel,
                 autoVisible : autoVisible,
                 autoMultiplier : s.autoDelayMultiply
             });
-            osd.show(4000);
         },
         stopAutoTimer : function () {
             if (s.autoTimer>0) {
                 osd.update({
+                    targetIndex: s.displayIndex,
+                    channelNumber : s.currentChannel,
                     autoVisible : false
                 });
                 window.clearInterval(s.autoTimer);
@@ -100,16 +142,7 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
         randomChannel : function () {
             var channel;
             if (s.randomChannels.length==0) {
-                var i, n, length, shuffle;
-                for (i = 0; i < dataSource.available; i++) {
-                    s.randomChannels[i] = i + 1;
-                }
-                for (length = s.randomChannels.length; length;) {
-                    n = Math.random() * length-- | 0;
-                    shuffle = s.randomChannels[n];
-                    s.randomChannels[n] = s.randomChannels[length];
-                    s.randomChannels[length] = shuffle;
-                }
+                s.randomChannels = util.randomIntegerArray(dataSource.available, 1);
             }
             channel = s.randomChannels.pop();
             s.currentChannel = channel;
@@ -117,7 +150,20 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
         },
         setChannel : function () {
 
-            document.getElementById('content').style.display = 'none';
+            if (s.autoTimer > 0) {
+                if (s.randomContentTargets.length == 0) {
+                    s.randomContentTargets = util.randomIntegerArray(s.displays, 0);
+                }
+                s.displayIndex = s.randomContentTargets.pop();
+            } else {
+                s.displayIndex += 1;
+                if (s.displayIndex >= s.displays) {
+                    s.displayIndex = 0;
+                }
+            }
+            var target = 'display_' + s.displayIndex;
+
+            document.getElementById(target).getElementsByClassName('content')[0].style.display = 'none';
 
             if (s.currentInput.length > 0) {
                 s.currentChannel = parseInt(s.currentInput);
@@ -132,28 +178,27 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
                 if (err || !data || !data['url']) return;
                 var ext = data['url'].split('.').pop().toLowerCase();
                 if (ext==='gif') {
-                    document.getElementById('content').style.backgroundImage = 'url(/db/gif/'+s.currentChannel+'.gif)';
-                    document.getElementById('content').style.display = 'block';
+                    document.getElementById(target).getElementsByClassName('content')[0].style.backgroundImage = 'url(/db/gif/'+s.currentChannel+'.gif)';
+                    document.getElementById(target).getElementsByClassName('content')[0].style.display = 'block';
                 }
                 osd.update({
+                    targetIndex: s.displayIndex,
                     channelNumber : s.currentChannel,
                     autoVisible : false
                 });
-                osd.show(4000);
             });
         },
         updateChannels : function (callback) {
             dataSource.getAvailable(function (err, status, data) {
                 if (err || status===false) {
-                    document.getElementById('blackout').style.display = 'block';
                     return callback(err, null);
-                } else {
-                    document.getElementById('blackout').style.display = 'none';
                 }
-                if (data) osd.padLength = dataSource.available.toString().length;
+                if (data) {
+                    osd.padLength = dataSource.available.toString().length;
+                }
                 if (typeof callback === 'function') callback(err, status);
             });
-            window.setTimeout(s.updateChannels,10000);
+            window.setTimeout(s.updateChannels, 10000);
         }
     };
     return s;
