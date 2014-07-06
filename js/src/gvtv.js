@@ -125,8 +125,6 @@ define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
                 s.autoDelayMultiply = 0;
             }
 
-            console.log(s.autoDelayMultiply, autoVisible, delta);
-
             osd.update({
                 targetIndex: s.displayIndex,
                 channelNumber : s.currentChannel,
@@ -182,7 +180,7 @@ define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
 
             s.dataSource.getChannel(s.currentChannel, function (err, data) {
                 if (err || !data) return;
-                s.platform.loadBgImage('/gif/' + s.currentChannel + '.gif', function (err, bgData) {
+                s.platform.loadBgImage('/gif/' + s.currentChannel + '.gif', s.dataSource.dataHost, function (err, bgData) {
                     document.getElementById(target).getElementsByClassName('content')[0].style.backgroundImage = bgData;
                     document.getElementById(target).getElementsByClassName('content')[0].style.display = 'block';
                     osd.update({

@@ -16,8 +16,8 @@ define(function () {
               elem.webkitRequestFullscreen();
             }
         },
-        loadBgImage : function (url, callback) {
-            callback(null, 'url(' + url + ')');
+        loadBgImage : function (url, dataHost, callback) {
+            callback(null, 'url(' + dataHost + url + ')');
         }
     }
     return s;

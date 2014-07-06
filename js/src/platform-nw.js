@@ -10,11 +10,9 @@ define(function () {
             win.toggleFullscreen();
             win.focus();
         },
-        loadBgImage : function (url, callback) {
+        loadBgImage : function (url, dataHost, callback) {
             var path = require('path'),
                 fs = require('fs'),
-                gui = require('nw.gui'),
-                dataHost = path.join(gui.App.dataPath, 'db'),
                 gifpath = path.join(dataHost, url);
             fs.readFile(gifpath, function (err, data) {
                 if (err) {
