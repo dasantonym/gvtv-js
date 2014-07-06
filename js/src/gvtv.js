@@ -5,25 +5,24 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
         keyTimeout : -1,
         autoTimer : -1,
         autoBaseDelay : 1000,
-        autoDelayMultiply: 5,
+        autoDelayMultiply: 3,
         randomChannels : [],
         init : function () {
             s.updateChannels(function (err) {
-                if (err) {
-                    console.log('failed to update channels', err);
-                    return;
-                }
-                s.currentChannel = Math.round(Math.random()*(dataSource.availableChannels-1))+1;
+                if (err) return;
+                s.currentChannel = Math.round(Math.random() * (dataSource.available - 1)) + 1;
                 s.setChannel();
-                s.autoChannel(true,false);
-                keyboard.registerKeys(s);
+                s.autoChannel(1, false);
+                keyboard.registerKeys(s.channelCommand);
             });
         },
         channelNumberInput: function (input) {
-            s.killAutoTimer();
+            var displayLength = dataSource.available.toString().length;
 
-            if (!osd.isOSDVisible()) {
-                osd.showOSD();
+            s.stopAutoTimer();
+
+            if (!osd.isVisible()) {
+                osd.show();
                 s.currentInput = '00000000';
             }
 
@@ -31,57 +30,67 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
                 window.clearTimeout(s.keyTimeout);
                 s.keyTimeout = -1;
             }
-            s.keyTimeout = window.setTimeout(function () { s.setChannel(); },2000);
+            s.keyTimeout = window.setTimeout(function () {
+                s.setChannel();
+            },2000);
             s.currentInput += input;
-            s.currentInput = s.currentInput.substr(s.currentInput.length-8);
+            if (s.currentInput.length > displayLength) {
+                s.currentInput = s.currentInput.substr(s.currentInput.length - displayLength, displayLength);
+            }
 
-            osd.updateOSD({
+            osd.update({
                 channelNumber : parseInt(s.currentInput)
             });
 
         },
         channelCommand : function (input) {
             if (input==='up') {
-                s.killAutoTimer();
+                s.stopAutoTimer();
                 s.channelMove(1);
             } else if (input==='down') {
-                s.killAutoTimer();
+                s.stopAutoTimer();
                 s.channelMove(-1);
             } else if (input==='+') {
-                s.autoChannel(true,true);
+                s.autoChannel(1, true);
             } else if (input==='-') {
-                s.autoChannel(false,true);
+                s.autoChannel(-1, true);
             } else {
-                s.killAutoTimer();
+                s.stopAutoTimer();
                 s.channelNumberInput(input);
             }
         },
         channelMove : function (delta) {
             s.currentChannel += delta;
             if (s.currentChannel < 1) {
-                s.currentChannel = dataSource.availableChannels;
-            } else if (s.currentChannel>dataSource.availableChannels) {
+                s.currentChannel = dataSource.available;
+            } else if (s.currentChannel > dataSource.available) {
                 s.currentChannel = 1;
             }
             s.setChannel();
         },
-        autoChannel : function (increase,autoVisible) {
-            if (increase) {
-                if (s.autoDelayMultiply < 100) s.autoDelayMultiply += 1;
+        autoChannel : function (delta, autoVisible) {
+            if (s.autoTimer > 0) s.stopAutoTimer();
+
+            s.autoDelayMultiply += delta;
+
+            if (s.autoDelayMultiply > 0) {
+                s.autoTimer = window.setInterval(
+                    s.randomChannel,
+                    s.autoBaseDelay * s.autoDelayMultiply
+                );
             } else {
-                if (s.autoDelayMultiply > 0) s.autoDelayMultiply -= 1;
+                s.autoDelayMultiply = 0;
             }
-            if (s.autoTimer > 0) s.killAutoTimer();
-            if (s.autoDelayMultiply > 0) s.autoTimer = window.setInterval(s.randomChannel,s.autoBaseDelay*s.autoDelayMultiply);
-            osd.updateOSD({
+
+            osd.update({
                 autoVisible : autoVisible,
                 autoMultiplier : s.autoDelayMultiply
             });
-            osd.showOSD(4000);
+            osd.show(4000);
         },
-        killAutoTimer : function () {
+        stopAutoTimer : function () {
             if (s.autoTimer>0) {
-                osd.updateOSD({
+                osd.update({
                     autoVisible : false
                 });
                 window.clearInterval(s.autoTimer);
@@ -92,7 +101,7 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
             var channel;
             if (s.randomChannels.length==0) {
                 var i, n, length, shuffle;
-                for (i = 0; i < dataSource.availableChannels; i++) {
+                for (i = 0; i < dataSource.available; i++) {
                     s.randomChannels[i] = i + 1;
                 }
                 for (length = s.randomChannels.length; length;) {
@@ -107,9 +116,6 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
             s.setChannel();
         },
         setChannel : function () {
-            if (s.currentChannel > dataSource.availableChannels) {
-                s.currentChannel = dataSource.availableChannels;
-            }
 
             document.getElementById('content').style.display = 'none';
 
@@ -118,27 +124,34 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSour
                 s.currentInput = '';
             }
 
-            dataSource.requestChannelContent(s.currentChannel, function (data) {
-                if (data===null || typeof data['url']==='undefined') return;
+            if (s.currentChannel > dataSource.available) {
+                s.currentChannel = dataSource.available;
+            }
+
+            dataSource.getChannel(s.currentChannel, function (err, data) {
+                if (err || !data || !data['url']) return;
                 var ext = data['url'].split('.').pop().toLowerCase();
                 if (ext==='gif') {
                     document.getElementById('content').style.backgroundImage = 'url(/db/gif/'+s.currentChannel+'.gif)';
                     document.getElementById('content').style.display = 'block';
                 }
-                osd.updateOSD({
+                osd.update({
                     channelNumber : s.currentChannel,
                     autoVisible : false
                 });
-                osd.showOSD(4000);
+                osd.show(4000);
             });
         },
         updateChannels : function (callback) {
-            dataSource.getChannels(function (err) {
-                if (err) {
+            dataSource.getAvailable(function (err, status, data) {
+                if (err || status===false) {
+                    document.getElementById('blackout').style.display = 'block';
                     return callback(err, null);
+                } else {
+                    document.getElementById('blackout').style.display = 'none';
                 }
-                osd.padLength = dataSource.availableChannels.toString().length;
-                if (typeof callback === 'function') callback();
+                if (data) osd.padLength = dataSource.available.toString().length;
+                if (typeof callback === 'function') callback(err, status);
             });
             window.setTimeout(s.updateChannels,10000);
         }

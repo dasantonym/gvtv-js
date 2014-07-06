@@ -1,55 +1,45 @@
 define(['jquery'], function ($) {
     var s = {
-        currentRequest : null,
-        availableChannels : 0,
+        request : null,
+        available : 0,
         dataHost: 'db',
-        requestChannelContent : function (num,callback) {
-            if (s.currentRequest) {
-                s.currentRequest.abort();
+        getChannel : function (channel, callback) {
+            if (s.request) {
+                s.request.abort();
             }
-            s.currentRequest = $.ajax({
-                url: s.dataHost+"/channels/"+num.toString()+".json",
+            s.request = $.ajax({
+                url: s.dataHost + "/channels/" + channel.toString() + ".json",
                 data: null,
                 type: 'get',
-                error: function(XMLHttpRequest, textStatus, errorThrown){
-                    console.log('error loading channel content', errorThrown);
-                    if (typeof callback==='function') callback(null, 'error loading channel content');
-                },
                 success: function(data){
                     if (data) {
-                        if (typeof callback==='function') callback(data);
+                        if (typeof callback==='function') callback(null, data);
                     }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    console.log('error loading channel content', errorThrown);
+                    if (typeof callback==='function') callback(new Error('error loading channel content'), null);
                 }
             });
         },
-        getAvailableChannels : function (callback) {
+        getAvailable : function (callback) {
             $.ajax({
                 url: s.dataHost+"/available.json",
                 type: 'get',
+                success: function(data){
+                    var status = false;
+                    if (data) {
+                        if (data>0) {
+                            status = true;
+                            s.available = data;
+                        }
+                    }
+                    if (typeof callback==='function') callback(null, status, data);
+                },
                 error: function(XMLHttpRequest, textStatus, errorThrown){
                     console.log('error getting available channels', errorThrown);
-                    if (typeof callback==='function') callback(null, 'error getting available channels');
-                },
-                success: function(data){
-                    if (typeof callback==='function') callback(JSON.parse(data), null);
+                    if (typeof callback==='function') callback(new Error('error loading channel content'), false, null);
                 }
-            });
-        },
-        getChannels : function (callback) {
-            s.getAvailableChannels(function (data, error) {
-                var status = false;
-                if (data) {
-                    if (data>0) {
-                        status = true;
-                        s.availableChannels = data;
-                    }
-                }
-                if (status===true) {
-                    document.getElementById('blackout').style.display = 'none';
-                } else {
-                    document.getElementById('blackout').style.display = 'block';
-                }
-                if (typeof callback==='function') callback(error, data);
             });
         }
     };

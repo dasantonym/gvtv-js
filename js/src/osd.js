@@ -1,43 +1,51 @@
 define(function () {
     var s = {
-        osdConfig : {
+        config : {
             channelNumber : 0,
             autoVisible : false,
             autoMultiplier : 1
         },
         padLength : 1,
-        osdTimeout : -1,
-        showOSD : function (timeout) {
+        timeout : -1,
+        show : function (timeout) {
             if (typeof timeout==='undefined') timeout = 2000;
-            if (s.osdTimeout>-1) {
-                window.clearTimeout(s.osdTimeout);
-                s.osdTimeout = -1;
+            if (s.timeout > -1) {
+                window.clearTimeout(s.timeout);
+                s.timeout = -1;
             }
-            s.osdTimeout = window.setTimeout(function () { s.hideOSD(); },timeout);
+            s.timeout = window.setTimeout(function () {
+                s.hide();
+            }, timeout);
             document.getElementById('osd').style.display='block';
         },
-        hideOSD : function () {
-            if (s.osdTimeout>-1) {
-                window.clearTimeout(s.osdTimeout);
-                s.osdTimeout = -1;
+        hide : function () {
+            if (s.timeout > -1) {
+                window.clearTimeout(s.timeout);
+                s.timeout = -1;
             }
             document.getElementById('osd').style.display='none';
         },
-        isOSDVisible : function () {
+        isVisible : function () {
             return document.getElementById('osd').style.display==='block';
         },
         padChannelDisplay : function (num) {
             var numStr = num.toString();
             while (numStr.length < s.padLength) {
-                numStr = '0'+numStr;
+                numStr = '0' + numStr;
             }
             return numStr;
         },
-        updateOSD : function (config) {
-            s.osdConfig = config;
-            if (typeof s.osdConfig.channelNumber!='undefined') document.getElementById('channelnum').innerHTML = s.padChannelDisplay(s.osdConfig.channelNumber);
-            if (typeof s.osdConfig.autoMultiplier!='undefined') document.getElementById('automulti').innerHTML = s.osdConfig.autoMultiplier.toString();
-            if (typeof s.osdConfig.autoVisible!='undefined') document.getElementById('auto').style.display = s.osdConfig.autoVisible ? 'block' : 'none';
+        update : function (osdConfig) {
+            s.config = osdConfig;
+            if (typeof s.config.channelNumber != 'undefined') {
+                document.getElementById('channelnum').innerHTML = s.padChannelDisplay(s.config.channelNumber);
+            }
+            if (typeof s.config.autoMultiplier != 'undefined') {
+                document.getElementById('automulti').innerHTML = s.config.autoMultiplier.toString();
+            }
+            if (typeof s.config.autoVisible != 'undefined') {
+                document.getElementById('auto').style.display = s.config.autoVisible ? 'block' : 'none';
+            }
         }
     };
     return s;
