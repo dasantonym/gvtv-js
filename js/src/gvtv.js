@@ -1,25 +1,29 @@
-define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, osd, dataSource, util) {
+define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
     var s = {
-        targetDivId : 'gvtv',
+        dataSource: null,
+        platform: null,
+        targetDivId: 'gvtv',
         gridSize: {
             x: 1,
             y: 1
         },
         currentChannel: 1,
         currentInput : '',
-        keyTimeout : -1,
-        autoTimer : -1,
-        autoBaseDelay : 500,
+        keyTimeout: -1,
+        autoTimer: -1,
+        autoBaseDelay: 500,
         autoDelayMultiply: 5,
-        displays : 0,
-        displayIndex : 0,
+        displays: 0,
+        displayIndex: 0,
         randomContentTargets: [],
-        randomChannels : [],
-        init : function () {
+        randomChannels: [],
+        init : function (dataSource, platform) {
+            s.dataSource = dataSource;
+            s.platform = platform;
             document.getElementById(s.targetDivId).innerHTML = '<div id="content-wrapper"></div><div id="menu-wrapper"></div>';
             s.updateChannels(function (err) {
                 if (err) return;
-                s.currentChannel = Math.round(Math.random() * (dataSource.available - 1)) + 1;
+                s.currentChannel = Math.round(Math.random() * (s.dataSource.available - 1)) + 1;
                 s.buildDisplays(function () {
                     s.autoChannel(1, false);
                     keyboard.registerKeys(s.channelCommand);
@@ -47,7 +51,7 @@ define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, o
             if (callback) callback();
         },
         channelNumberInput: function (input) {
-            var displayLength = dataSource.available.toString().length;
+            var displayLength = s.dataSource.available.toString().length;
 
             s.stopAutoTimer();
 
@@ -91,6 +95,8 @@ define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, o
                 s.gridSize.y += 1;
                 if (s.gridSize.y > 8) s.gridSize.y = 1;
                 s.buildDisplays();
+            } else if (input==='f') {
+                s.platform.toggleFullscreen(s.targetDivId);
             } else {
                 s.stopAutoTimer();
                 s.channelNumberInput(input);
@@ -99,8 +105,8 @@ define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, o
         channelMove : function (delta) {
             s.currentChannel += delta;
             if (s.currentChannel < 1) {
-                s.currentChannel = dataSource.available;
-            } else if (s.currentChannel > dataSource.available) {
+                s.currentChannel = s.dataSource.available;
+            } else if (s.currentChannel > s.dataSource.available) {
                 s.currentChannel = 1;
             }
             s.setChannel();
@@ -142,7 +148,7 @@ define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, o
         randomChannel : function () {
             var channel;
             if (s.randomChannels.length==0) {
-                s.randomChannels = util.randomIntegerArray(dataSource.available, 1);
+                s.randomChannels = util.randomIntegerArray(s.dataSource.available, 1);
             }
             channel = s.randomChannels.pop();
             s.currentChannel = channel;
@@ -170,11 +176,11 @@ define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, o
                 s.currentInput = '';
             }
 
-            if (s.currentChannel > dataSource.available) {
-                s.currentChannel = dataSource.available;
+            if (s.currentChannel > s.dataSource.available) {
+                s.currentChannel = s.dataSource.available;
             }
 
-            dataSource.getChannel(s.currentChannel, function (err, data) {
+            s.dataSource.getChannel(s.currentChannel, function (err, data) {
                 if (err || !data || !data['url']) return;
                 var ext = data['url'].split('.').pop().toLowerCase();
                 if (ext==='gif') {
@@ -189,12 +195,12 @@ define(['src/keyboard','src/osd', 'src/data', 'src/util'], function (keyboard, o
             });
         },
         updateChannels : function (callback) {
-            dataSource.getAvailable(function (err, status, data) {
+            s.dataSource.getAvailable(function (err, status, data) {
                 if (err || status===false) {
                     return callback(err, null);
                 }
                 if (data) {
-                    osd.padLength = dataSource.available.toString().length;
+                    osd.padLength = s.dataSource.available.toString().length;
                 }
                 if (typeof callback === 'function') callback(err, status);
             });

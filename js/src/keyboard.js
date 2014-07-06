@@ -18,7 +18,9 @@ define(function () {
                     callback('x');
                 } else if (s.getChar(input).toLowerCase() === 'y') {
                    callback('y');
-               }
+                } else if (s.getChar(input).toLowerCase() === 'f') {
+                   callback('f');
+                }
             }
         },
         getChar : function (keycode) {

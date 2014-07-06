@@ -37,7 +37,6 @@ define(function () {
             s.getTarget().innerHTML = '';
             s.config = osdConfig;
             var osdCode = '<div class="channelnum">' + ( s.config.channelNumber ? s.config.channelNumber : '' ) + '</div>';
-            console.log(s.config);
             if (s.config.autoVisible==true) {
                 osdCode += '<div class="auto">Random ' + ( s.config.autoMultiplier && s.config.autoMultiplier > 0 ? (s.config.autoMultiplier/2).toFixed(1) + 's' : 'off' ) + '</div>';
             }
