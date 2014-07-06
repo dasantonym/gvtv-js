@@ -1,3 +1,7 @@
+////
+//
+// web specific features
+
 define(function () {
     var s = {
         toggleFullscreen : function (target) {
@@ -11,6 +15,9 @@ define(function () {
             } else if (elem.webkitRequestFullscreen) {
               elem.webkitRequestFullscreen();
             }
+        },
+        loadBgImage : function (url, callback) {
+            callback(null, 'url(' + url + ')');
         }
     }
     return s;

@@ -1,5 +1,5 @@
 ({
     baseUrl: ".",
-    name: "main-node-webkit",
+    name: "gvtv-nw",
     out: "gvtv-nw.min.js"
 })

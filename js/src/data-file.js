@@ -8,14 +8,14 @@ define(function () {
             fs.readFile(path.join(s.dataHost, 'channels', num.toString() + '.json'), function (err, data) {
                 if (err) {
                     console.log('error loading channel file', err);
-                    return callback(null, err);
+                    return callback(err, null);
                 }
                 try {
                     var obj = JSON.parse(data);
                 } catch (e) {
-                    return callback(null, e);
+                    return callback(e, null);
                 }
-                callback(obj);
+                callback(null, obj);
             });
         },
         getAvailable : function (callback) {
@@ -24,7 +24,7 @@ define(function () {
             fs.readFile(path.join(s.dataHost, 'available.json'), function (err, data) {
                 if (err) {
                     console.log('error loading available file', err);
-                    return callback(null, err);
+                    return callback(err, null);
                 }
                 try {
                     var obj = JSON.parse(data);
@@ -37,27 +37,25 @@ define(function () {
                     }
                     if (typeof callback==='function') callback(null, status, data);
                 } catch (e) {
-                    return callback(null, e);
+                    return callback(e, null);
                 }
-                callback(obj);
+                callback(null, obj);
             });
-      },
-      writeConfig : function (config, callback) {
-        var s = gvtvData;
-        var fs = require('fs');
-        var path = require('path');
-          fs.writeFile(path.join(s.dataHost, 'config.json'), JSON.stringify(config), function (err) {
-              if (err) {
-                  callback(err, null);
-                  return;
-              }
-              callback();
-          });
-      },
-      readConfig : function (callback) {
-          var s = gvtvData;
-          var fs = require('fs');
-          var path = require('path');
+        },
+        writeConfig : function (config, callback) {
+        var fs = require('fs'),
+            path = require('path');
+        fs.writeFile(path.join(s.dataHost, 'config.json'), JSON.stringify(config), function (err) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            callback();
+        });
+        },
+        readConfig : function (callback) {
+            var fs = require('fs'),
+                path = require('path');
             fs.readFile(path.join(s.dataHost, 'config.json'), function (err, data) {
                 if (err) {
                     callback(err, null);
@@ -70,14 +68,14 @@ define(function () {
                 }
                 callback(null, obj);
             });
-      },
-      checkVersion : function () {
-          var http = require('http');
-            var options = {
-                host: 'gvtv.jetzt',
-                port: 80,
-                path: '/api/v1/desktopVersion.json'
-            };
+        },
+        checkVersion : function () {
+            var http = require('http'),
+                options = {
+                    host: 'gvtv.jetzt',
+                    port: 80,
+                    path: '/api/v1/desktopVersion.json'
+                };
 
             http.get(options, function (res) {
                 var data = '';
@@ -99,13 +97,14 @@ define(function () {
                         if (parseInt(componentsRemote[i]) > parseInt(componentsLocal[i])) hasUpdate = true;
                     }
                     if (hasUpdate) {
-                        $('#updateModal').modal({});
+                        // TODO: add menu
+                        //$('#updateModal').modal({});
                     }
                 });
             }).on('error', function (err) {
                 console.log('unable to check version', err);
             });
-      }
+        }
     };
     return s;
 });

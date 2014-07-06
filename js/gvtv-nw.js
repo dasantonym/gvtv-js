@@ -1,8 +1,8 @@
-require.config({
+requirejs.config({
     baseUrl: 'js'
 });
 
-require(['src/gvtv', 'src/data-file', 'src/node-webkit'], function (gvtv, data, platform) {
+requirejs(['src/gvtv', 'src/data-file', 'src/platform-nw'], function (gvtv, data, platform) {
     var path = require('path');
     var gui = require('nw.gui');
     console.log(gui.App.dataPath);
@@ -40,7 +40,7 @@ require(['src/gvtv', 'src/data-file', 'src/node-webkit'], function (gvtv, data, 
                     console.log('error parsing default config', e);
                     return;
                 }
-                config.dbPath = gvtvData.dataHost;
+                config.dbPath = data.dataHost;
                 gvtvNode.setConfig(config, function () {
                     gvtvNode.initDb(function (err) {
                         if (err) {
@@ -54,7 +54,8 @@ require(['src/gvtv', 'src/data-file', 'src/node-webkit'], function (gvtv, data, 
                             }
                             gvtvNode.startAddingGifs();
                             gvtv.init(data, platform);
-                            $('#introModal').modal({});
+                            // TODO: add menu
+                            // $('#introModal').modal({});
                         });
                     });
                 });
@@ -62,8 +63,11 @@ require(['src/gvtv', 'src/data-file', 'src/node-webkit'], function (gvtv, data, 
         }
     });
 
+    // TODO: add menu
+    /*
     $('#updateButton').click(function () {
         require('nw.gui').Shell.openExternal('http://gvtv.jetzt/');
         $('#updateModal').modal('hide');
     });
+    */
 });

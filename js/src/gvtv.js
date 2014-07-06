@@ -181,23 +181,22 @@ define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
             }
 
             s.dataSource.getChannel(s.currentChannel, function (err, data) {
-                if (err || !data || !data['url']) return;
-                var ext = data['url'].split('.').pop().toLowerCase();
-                if (ext==='gif') {
-                    document.getElementById(target).getElementsByClassName('content')[0].style.backgroundImage = 'url(/db/gif/'+s.currentChannel+'.gif)';
+                if (err || !data) return;
+                s.platform.loadBgImage('/gif/' + s.currentChannel + '.gif', function (err, bgData) {
+                    document.getElementById(target).getElementsByClassName('content')[0].style.backgroundImage = bgData;
                     document.getElementById(target).getElementsByClassName('content')[0].style.display = 'block';
-                }
-                osd.update({
-                    targetIndex: s.displayIndex,
-                    channelNumber : s.currentChannel,
-                    autoVisible : false
+                    osd.update({
+                        targetIndex: s.displayIndex,
+                        channelNumber : s.currentChannel,
+                        autoVisible : false
+                    });
                 });
             });
         },
         updateChannels : function (callback) {
             s.dataSource.getAvailable(function (err, status, data) {
                 if (err || status===false) {
-                    return callback(err, null);
+                    if (typeof callback === 'function') return callback(err, null);
                 }
                 if (data) {
                     osd.padLength = s.dataSource.available.toString().length;
