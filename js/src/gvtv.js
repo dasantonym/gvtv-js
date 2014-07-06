@@ -1,7 +1,8 @@
-define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
+define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, osd, util, msg) {
     var s = {
         dataSource: null,
         platform: null,
+        msg: msg,
         targetDivId: 'gvtv',
         gridSize: {
             x: 1,
@@ -20,13 +21,16 @@ define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
         init : function (dataSource, platform) {
             s.dataSource = dataSource;
             s.platform = platform;
-            document.getElementById(s.targetDivId).innerHTML = '<div id="content-wrapper"></div><div id="menu-wrapper"></div>';
+            document.getElementById(s.targetDivId).innerHTML = '<div id="content-wrapper"></div><div id="menu-wrapper"><div id="menu-content"></div></div>';
             s.updateChannels(function (err) {
                 if (err) return;
                 s.currentChannel = Math.round(Math.random() * (s.dataSource.available - 1)) + 1;
                 s.buildDisplays(function () {
                     s.autoChannel(1, false);
                     keyboard.registerKeys(s.channelCommand);
+                    msg.toggle('intro', null, function () {
+                        osd.setDisabled(msg.hasContent());
+                    });
                 });
             });
         },
@@ -35,7 +39,7 @@ define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
             var cellSizeX = (100.0/ s.gridSize.x).toFixed(2),
                 cellSizeY = (100.0/ s.gridSize.y).toFixed(2),
                 css = 'width:' + cellSizeX + '%;height:' + cellSizeY + '%;',
-                fontSizeCss = 'font-size:' + (4.0 / (s.gridSize.x > s.gridSize.y ? s.gridSize.x : s.gridSize.y)).toFixed(2) + 'em;';
+                fontSizeCss = 'font-size:' + (3.5 / (s.gridSize.x > s.gridSize.y ? s.gridSize.x : s.gridSize.y)).toFixed(2) + 'em;';
                 displayCode = '',
                 i = 0;
             for (var y = 0; y < s.gridSize.y; y += 1) {
@@ -95,8 +99,17 @@ define(['src/keyboard','src/osd', 'src/util'], function (keyboard, osd, util) {
                 s.gridSize.y += 1;
                 if (s.gridSize.y > 8) s.gridSize.y = 1;
                 s.buildDisplays();
-            } else if (input==='f') {
+            } else if (input==='fullscreen') {
                 s.platform.toggleFullscreen(s.targetDivId);
+            } else if (input==='help') {
+                msg.toggle('help', null, function () {
+                    osd.setDisabled(msg.hasContent());
+                });
+            } else if (input==='osd') {
+                if (msg.hasContent()) return;
+                osd.setDisabled(osd.disabled ? false : true);
+            } else if (input==='action') {
+                if (msg.hasContent()) msg.executeAction();
             } else {
                 s.stopAutoTimer();
                 s.channelNumberInput(input);

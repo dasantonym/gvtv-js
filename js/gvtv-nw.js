@@ -24,7 +24,7 @@ requirejs(['src/gvtv', 'src/data-file', 'src/platform-nw'], function (gvtv, data
                         }
                         gvtvNode.startAddingGifs();
                         gvtv.init(data, platform);
-                        data.checkVersion();
+                        platform.checkVersion(gvtv.msg);
                     });
                 });
             });
@@ -54,20 +54,11 @@ requirejs(['src/gvtv', 'src/data-file', 'src/platform-nw'], function (gvtv, data
                             }
                             gvtvNode.startAddingGifs();
                             gvtv.init(data, platform);
-                            // TODO: add menu
-                            // $('#introModal').modal({});
+                            gvtv.msg.toggle('intro');
                         });
                     });
                 });
             });
         }
     });
-
-    // TODO: add menu
-    /*
-    $('#updateButton').click(function () {
-        require('nw.gui').Shell.openExternal('http://gvtv.jetzt/');
-        $('#updateModal').modal('hide');
-    });
-    */
 });

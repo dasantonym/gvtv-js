@@ -31,6 +31,17 @@ body {
   text-transform: uppercase;
   color: #0f0;
 }
+#gvtv {
+    width:100%;
+    height:100%;
+}
+#content-wrapper, #menu-wrapper {
+    width:100%;
+    height:100%;
+    position:absolute;
+    left:0;
+    top:0;
+}
 .display {
   background: #000 url(../img/noise.gif) no-repeat top center;
   background-position: center;
@@ -68,6 +79,27 @@ body {
   left:10%;
   bottom:12.5%;
   font-size:60%;
+}
+#menu-wrapper {
+    display:none;
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background: rgba(0, 0, 0, 0.7);
+}
+#menu-content {
+    position:absolute;
+    width:80%;
+    height:75%;
+    left:10%;
+    top:12.5%;
+    font-size:175%;
+    line-height: 1.5em;
+}
+.msg p {
+    text-align: center;
 }
 #blackout {
   display:none;

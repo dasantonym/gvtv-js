@@ -9,6 +9,7 @@ define(function () {
         },
         padLength : 1,
         timeout : -1,
+        disabled : false,
         show : function () {
             var target = s.getTarget();
             if (s.timeout > -1) {
@@ -26,6 +27,14 @@ define(function () {
             }
             target.innerHTML = '';
         },
+        setDisabled : function (disabled) {
+            s.disabled = disabled;
+            if (s.disabled) {
+                s.hide(s.getTarget());
+            } else {
+                s.update(s.config);
+            }
+        },
         padChannelDisplay : function (num) {
             var numStr = num.toString();
             while (numStr.length < s.padLength) {
@@ -34,6 +43,7 @@ define(function () {
             return numStr;
         },
         update : function (osdConfig) {
+            if (s.disabled) return;
             s.getTarget().innerHTML = '';
             s.config = osdConfig;
             var osdCode = '<div class="channelnum">' + ( s.config.channelNumber ? s.config.channelNumber : '' ) + '</div>';

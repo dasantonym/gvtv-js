@@ -68,42 +68,6 @@ define(function () {
                 }
                 callback(null, obj);
             });
-        },
-        checkVersion : function () {
-            var http = require('http'),
-                options = {
-                    host: 'gvtv.jetzt',
-                    port: 80,
-                    path: '/api/v1/desktopVersion.json'
-                };
-
-            http.get(options, function (res) {
-                var data = '';
-                res.on('data', function (chunk) {
-                    data += chunk;
-                });
-                res.on('end', function () {
-                    try {
-                        var obj = JSON.parse(data);
-                    } catch (e) {
-                        console.log('unable to check version', e);
-                        return;
-                    }
-                    var gui = require('nw.gui');
-                    var componentsRemote = obj.version_string.split('.');
-                    var componentsLocal = gui.App.manifest.version.split('.');
-                    var hasUpdate = false;
-                    for (var i in componentsRemote) {
-                        if (parseInt(componentsRemote[i]) > parseInt(componentsLocal[i])) hasUpdate = true;
-                    }
-                    if (hasUpdate) {
-                        // TODO: add menu
-                        //$('#updateModal').modal({});
-                    }
-                });
-            }).on('error', function (err) {
-                console.log('unable to check version', err);
-            });
         }
     };
     return s;

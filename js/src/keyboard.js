@@ -14,13 +14,22 @@ define(function () {
                     callback('up');
                 } else if (input === 40) {
                     callback('down');
+                } else if (input === 13) {
+                    callback('action');
                 } else if (s.getChar(input).toLowerCase() === 'x') {
                     callback('x');
                 } else if (s.getChar(input).toLowerCase() === 'y') {
                    callback('y');
                 } else if (s.getChar(input).toLowerCase() === 'f') {
-                   callback('f');
+                   callback('fullscreen');
+                } else if (s.getChar(input).toLowerCase() === ' ') {
+                   callback('help');
+                } else if (s.getChar(input).toLowerCase() === 'h') {
+                   callback('help');
+                } else if (s.getChar(input).toLowerCase() === 'o') {
+                   callback('osd');
                 }
+
             }
         },
         getChar : function (keycode) {
