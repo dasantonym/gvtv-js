@@ -3,9 +3,9 @@ define(function () {
         osdConfig : {
             channelNumber : 0,
             autoVisible : false,
-            autoMultiplier : 1,
-            padLength: 1
+            autoMultiplier : 1
         },
+        padLength : 1,
         osdTimeout : -1,
         showOSD : function (timeout) {
             if (typeof timeout==='undefined') timeout = 2000;
@@ -28,7 +28,7 @@ define(function () {
         },
         padChannelDisplay : function (num) {
             var numStr = num.toString();
-            while (numStr.length < s.osdConfig.padLength) {
+            while (numStr.length < s.padLength) {
                 numStr = '0'+numStr;
             }
             return numStr;
@@ -36,7 +36,7 @@ define(function () {
         updateOSD : function (config) {
             s.osdConfig = config;
             if (typeof s.osdConfig.channelNumber!='undefined') document.getElementById('channelnum').innerHTML = s.padChannelDisplay(s.osdConfig.channelNumber);
-            if (typeof s.osdConfig.autoMultiplier!='undefined') document.getElementById('automulti').innerHTML = s.osdConfig.autoMultiplier;
+            if (typeof s.osdConfig.autoMultiplier!='undefined') document.getElementById('automulti').innerHTML = s.osdConfig.autoMultiplier.toString();
             if (typeof s.osdConfig.autoVisible!='undefined') document.getElementById('auto').style.display = s.osdConfig.autoVisible ? 'block' : 'none';
         }
     };

@@ -1,4 +1,4 @@
-define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
+define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, dataSource) {
     var s = {
         currentChannel: 1,
         currentInput : '',
@@ -6,31 +6,24 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
         autoTimer : -1,
         autoBaseDelay : 1000,
         autoDelayMultiply: 5,
-        osd : null,
-        keyboard : null,
-        data : null,
         randomChannels : [],
         init : function () {
-            s.osd = osd;
-            s.keyboard = keyboard;
-            s.keyboard.registerKeys(s);
-
-            s.data = data;
-            s.data.getChannels(function (err) {
-              if (err) {
-                  return;
-              }
-              s.currentChannel = Math.round(Math.random()*(s.data.availableChannels-1))+1;
-              s.setChannel();
-              s.autoChannel(true,false);
+            s.updateChannels(function (err) {
+                if (err) {
+                    console.log('failed to update channels', err);
+                    return;
+                }
+                s.currentChannel = Math.round(Math.random()*(dataSource.availableChannels-1))+1;
+                s.setChannel();
+                s.autoChannel(true,false);
+                keyboard.registerKeys(s);
             });
-
         },
         channelNumberInput: function (input) {
             s.killAutoTimer();
 
-            if (!s.osd.isOSDVisible()) {
-                s.osd.showOSD();
+            if (!osd.isOSDVisible()) {
+                osd.showOSD();
                 s.currentInput = '00000000';
             }
 
@@ -42,10 +35,8 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
             s.currentInput += input;
             s.currentInput = s.currentInput.substr(s.currentInput.length-8);
 
-            s.osd.updateOSD({
-                channelNumber : parseInt(s.currentInput),
-                padLength : s.data.availableChannels.toString().length,
-                channelInfo : ''
+            osd.updateOSD({
+                channelNumber : parseInt(s.currentInput)
             });
 
         },
@@ -68,8 +59,8 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
         channelMove : function (delta) {
             s.currentChannel += delta;
             if (s.currentChannel < 1) {
-                s.currentChannel = s.data.availableChannels;
-            } else if (s.currentChannel>s.data.availableChannels) {
+                s.currentChannel = dataSource.availableChannels;
+            } else if (s.currentChannel>dataSource.availableChannels) {
                 s.currentChannel = 1;
             }
             s.setChannel();
@@ -82,15 +73,15 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
             }
             if (s.autoTimer > 0) s.killAutoTimer();
             if (s.autoDelayMultiply > 0) s.autoTimer = window.setInterval(s.randomChannel,s.autoBaseDelay*s.autoDelayMultiply);
-            s.osd.updateOSD({
+            osd.updateOSD({
                 autoVisible : autoVisible,
                 autoMultiplier : s.autoDelayMultiply
             });
-            s.osd.showOSD(4000);
+            osd.showOSD(4000);
         },
         killAutoTimer : function () {
             if (s.autoTimer>0) {
-                s.osd.updateOSD({
+                osd.updateOSD({
                     autoVisible : false
                 });
                 window.clearInterval(s.autoTimer);
@@ -101,7 +92,7 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
             var channel;
             if (s.randomChannels.length==0) {
                 var i, n, length, shuffle;
-                for (i = 0; i < s.data.availableChannels; i++) {
+                for (i = 0; i < dataSource.availableChannels; i++) {
                     s.randomChannels[i] = i + 1;
                 }
                 for (length = s.randomChannels.length; length;) {
@@ -116,31 +107,40 @@ define(['src/keyboard','src/osd', 'src/data'], function (keyboard, osd, data) {
             s.setChannel();
         },
         setChannel : function () {
-            if (s.currentChannel > s.data.availableChannels) {
-                s.currentChannel = s.data.availableChannels;
+            if (s.currentChannel > dataSource.availableChannels) {
+                s.currentChannel = dataSource.availableChannels;
             }
 
             document.getElementById('content').style.display = 'none';
 
             if (s.currentInput.length > 0) {
-                s.currentChannel = parseInt(GVTV.currentInput);
+                s.currentChannel = parseInt(s.currentInput);
                 s.currentInput = '';
             }
 
-            s.data.requestChannelContent(s.currentChannel, function (data) {
+            dataSource.requestChannelContent(s.currentChannel, function (data) {
                 if (data===null || typeof data['url']==='undefined') return;
                 var ext = data['url'].split('.').pop().toLowerCase();
                 if (ext==='gif') {
                     document.getElementById('content').style.backgroundImage = 'url(/db/gif/'+s.currentChannel+'.gif)';
                     document.getElementById('content').style.display = 'block';
                 }
-                s.osd.updateOSD({
+                osd.updateOSD({
                     channelNumber : s.currentChannel,
-                    padLength : s.data.availableChannels.toString().length,
                     autoVisible : false
                 });
-                s.osd.showOSD(4000);
+                osd.showOSD(4000);
             });
+        },
+        updateChannels : function (callback) {
+            dataSource.getChannels(function (err) {
+                if (err) {
+                    return callback(err, null);
+                }
+                osd.padLength = dataSource.availableChannels.toString().length;
+                if (typeof callback === 'function') callback();
+            });
+            window.setTimeout(s.updateChannels,10000);
         }
     };
     return s;

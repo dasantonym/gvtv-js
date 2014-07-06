@@ -36,7 +36,6 @@ define(['jquery'], function ($) {
             });
         },
         getChannels : function (callback) {
-            window.setTimeout(s.getChannels,10000);
             s.getAvailableChannels(function (data, error) {
                 var status = false;
                 if (data) {
