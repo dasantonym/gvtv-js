@@ -8,7 +8,7 @@ define(['jquery'], function ($) {
                 return callback(null);
             }
             s.currentSnippet = snippet;
-            s.currentAction = snippet;
+            s.currentAction = action;
             $.ajax({
                 url: 'js/snippets/' + s.currentSnippet + '.html',
                 type: 'get',
