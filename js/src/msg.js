@@ -3,7 +3,7 @@ define(['jquery'], function ($) {
         currentSnippet : null,
         currentAction : null,
         toggle : function (snippet, action, callback) {
-            if (s.currentSnippet == snippet && document.getElementById('menu-content').innerHTML.length > 0) {
+            if (s.currentSnippet == snippet && document.getElementById('gvtv-mc').innerHTML.length > 0) {
                 s.hide();
                 return callback(null);
             }
@@ -13,8 +13,8 @@ define(['jquery'], function ($) {
                 url: 'js/snippets/' + s.currentSnippet + '.html',
                 type: 'get',
                 success: function(data){
-                    document.getElementById('menu-content').innerHTML = data;
-                    document.getElementById('menu-wrapper').style.display = 'block';
+                    document.getElementById('gvtv-mc').innerHTML = data;
+                    document.getElementById('gvtv-mw').style.display = 'block';
                     callback(null);
                 },
                 error: function(XMLHttpRequest, textStatus, errorThrown){
@@ -24,8 +24,8 @@ define(['jquery'], function ($) {
             });
         },
         hide : function () {
-            document.getElementById('menu-wrapper').style.display = 'none';
-            document.getElementById('menu-content').innerHTML = '';
+            document.getElementById('gvtv-mw').style.display = 'none';
+            document.getElementById('gvtv-mc').innerHTML = '';
         },
         executeAction : function () {
             if (typeof s.currentAction === 'function') {
@@ -33,7 +33,7 @@ define(['jquery'], function ($) {
             }
         },
         hasContent : function () {
-            return document.getElementById('menu-content').innerHTML.length > 0;
+            return document.getElementById('gvtv-mc').innerHTML.length > 0;
         }
     };
     return s;

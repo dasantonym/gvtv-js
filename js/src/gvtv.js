@@ -21,7 +21,7 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
         init : function (dataSource, platform) {
             s.dataSource = dataSource;
             s.platform = platform;
-            document.getElementById(s.targetDivId).innerHTML = '<div id="content-wrapper"></div><div id="menu-wrapper"><div id="menu-content"></div></div>';
+            document.getElementById(s.targetDivId).innerHTML = '<div id="gvtv-cw"></div><div id="gvtv-mw"><div id="gvtv-mc"></div></div>';
             s.updateChannels(function (err) {
                 if (err) return;
                 s.currentChannel = Math.round(Math.random() * (s.dataSource.available - 1)) + 1;
@@ -45,11 +45,11 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
             for (var y = 0; y < s.gridSize.y; y += 1) {
                 for (var x = 0; x < s.gridSize.x; x += 1) {
                     var positionCss = 'left:' + cellSizeX*x + '%;' + 'top:' + cellSizeY*y + '%;'
-                    displayCode += '<div id="display_' + i + '" style="' + css + fontSizeCss + positionCss + '" class="display"><div class="content"></div><div class="osd"></div></div>';
+                    displayCode += '<div id="gvtv-d_' + i + '" style="' + css + fontSizeCss + positionCss + '" class="gvtv-d"><div class="gvtv-c"></div><div class="gvtv-osd"></div></div>';
                     i += 1;
                 }
             }
-            document.getElementById('content-wrapper').innerHTML = displayCode;
+            document.getElementById('gvtv-cw').innerHTML = displayCode;
             s.randomContentTargets = util.randomIntegerArray(s.displays, 0);
             s.setChannel();
             if (callback) callback();
@@ -178,9 +178,9 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
                     s.displayIndex = 0;
                 }
             }
-            var target = 'display_' + s.displayIndex;
+            var target = 'gvtv-d_' + s.displayIndex;
 
-            document.getElementById(target).getElementsByClassName('content')[0].style.display = 'none';
+            document.getElementById(target).getElementsByClassName('gvtv-c')[0].style.display = 'none';
 
             if (s.currentInput.length > 0) {
                 s.currentChannel = parseInt(s.currentInput);
@@ -194,8 +194,8 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
             s.dataSource.getChannel(s.currentChannel, function (err, data) {
                 if (err || !data) return;
                 s.platform.loadBgImage('/gif/' + s.currentChannel + '.gif', s.dataSource.dataHost, function (err, bgData) {
-                    document.getElementById(target).getElementsByClassName('content')[0].style.backgroundImage = bgData;
-                    document.getElementById(target).getElementsByClassName('content')[0].style.display = 'block';
+                    document.getElementById(target).getElementsByClassName('gvtv-c')[0].style.backgroundImage = bgData;
+                    document.getElementById(target).getElementsByClassName('gvtv-c')[0].style.display = 'block';
                     osd.update({
                         targetIndex: s.displayIndex,
                         channelNumber : s.currentChannel,

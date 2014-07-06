@@ -46,9 +46,9 @@ define(function () {
             if (s.disabled) return;
             s.getTarget().innerHTML = '';
             s.config = osdConfig;
-            var osdCode = '<div class="channelnum">' + ( s.config.channelNumber ? s.config.channelNumber : '' ) + '</div>';
+            var osdCode = '<div class="gvtv-osd-cn">' + ( s.config.channelNumber ? s.config.channelNumber : '' ) + '</div>';
             if (s.config.autoVisible==true) {
-                osdCode += '<div class="auto">Random ' + ( s.config.autoMultiplier && s.config.autoMultiplier > 0 ? (s.config.autoMultiplier/2).toFixed(1) + 's' : 'off' ) + '</div>';
+                osdCode += '<div class="gvtv-osd-rnd">Random ' + ( s.config.autoMultiplier && s.config.autoMultiplier > 0 ? (s.config.autoMultiplier/2).toFixed(1) + 's' : 'off' ) + '</div>';
             }
             s.getTarget().innerHTML = osdCode;
             s.show();
@@ -57,7 +57,7 @@ define(function () {
             if (!target) {
                 target = s.config.targetIndex;
             }
-            return document.getElementById('display_' + target).getElementsByClassName('osd')[0];
+            return document.getElementById('gvtv-d_' + target).getElementsByClassName('gvtv-osd')[0];
         }
     };
     return s;
