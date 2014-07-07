@@ -1,4 +1,4 @@
-define(['jquery'], function ($) {
+define(function () {
     var s = {
         request : null,
         available : 0,
@@ -7,40 +7,51 @@ define(['jquery'], function ($) {
             if (s.request) {
                 s.request.abort();
             }
-            s.request = $.ajax({
-                url: s.dataHost + "/channels/" + channel.toString() + ".json",
-                data: null,
-                type: 'get',
-                success: function(data){
-                    if (data) {
-                        if (typeof callback==='function') callback(null, data);
+            s.request = new XMLHttpRequest();
+            s.request.onreadystatechange = function () {
+                if (s.request.readyState==4 && s.request.status==200) {
+                    if (s.request.responseText) {
+                        try {
+                            var result = JSON.parse(s.request.responseText);
+                        } catch (e) {
+                            return callback(e, null);
+                        }
+                        callback(null, result);
+                    } else {
+                        callback(new Error('error loading channel content'));
                     }
-                },
-                error: function(XMLHttpRequest, textStatus, errorThrown){
-                    console.log('error loading channel content', errorThrown);
-                    if (typeof callback==='function') callback(new Error('error loading channel content'), null);
+                } else {
+                    callback(new Error('error loading channel content'));
                 }
-            });
+            };
+            s.request.open('GET', s.dataHost + '/channels/' + channel.toString() + '.json', true);
+            s.request.send();
         },
         getAvailable : function (callback) {
-            $.ajax({
-                url: s.dataHost+"/available.json",
-                type: 'get',
-                success: function(data){
-                    var status = false;
-                    if (data) {
-                        if (data>0) {
-                            status = true;
-                            s.available = data;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState==4 && xhr.status==200) {
+                    if (xhr.response) {
+                        try {
+                            var result = JSON.parse(xhr.response);
+                        } catch (e) {
+                            return callback(e, false, null);
                         }
+                        var status = false;
+                        if (result>0) {
+                            status = true;
+                            s.available = result;
+                        }
+                        if (typeof callback==='function') callback(null, status, result);
+                    } else {
+                        callback(new Error('error loading available channels'), false, null);
                     }
-                    if (typeof callback==='function') callback(null, status, data);
-                },
-                error: function(XMLHttpRequest, textStatus, errorThrown){
-                    console.log('error getting available channels', errorThrown);
-                    if (typeof callback==='function') callback(new Error('error loading channel content'), false, null);
+                } else {
+                    callback(new Error('error loading channel content'), false, null);
                 }
-            });
+            };
+            xhr.open('GET', s.dataHost + '/available.json', true);
+            xhr.send();
         }
     };
     return s;

@@ -1,4 +1,4 @@
-define(['jquery'], function ($) {
+define(function () {
     var s = {
         currentSnippet : null,
         currentAction : null,
@@ -7,21 +7,20 @@ define(['jquery'], function ($) {
                 s.hide();
                 return callback(null);
             }
+            var xhr = new XMLHttpRequest();
             s.currentSnippet = snippet;
             s.currentAction = action;
-            $.ajax({
-                url: 'js/snippets/' + s.currentSnippet + '.html',
-                type: 'get',
-                success: function(data){
-                    document.getElementById('gvtv-mc').innerHTML = data;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState==4 && xhr.status==200) {
+                    document.getElementById('gvtv-mc').innerHTML = xhr.responseText;
                     document.getElementById('gvtv-mw').style.display = 'block';
                     callback(null);
-                },
-                error: function(XMLHttpRequest, textStatus, errorThrown){
-                    console.log('error getting snippet', errorThrown);
-                    callback(errorThrown);
+                } else {
+                    callback(new Error('failed to fetch snippet'));
                 }
-            });
+            };
+            xhr.open('GET', 'js/snippets/' + s.currentSnippet + '.html', true);
+            xhr.send();
         },
         hide : function () {
             document.getElementById('gvtv-mw').style.display = 'none';
