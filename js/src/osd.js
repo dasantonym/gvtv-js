@@ -1,38 +1,37 @@
 define(function () {
     var s = {
         config : {
-            targetIndex : 0,
             channelNumber : 0,
-            autoVisible : false,
-            autoMultiplier : 1,
+            autoVisible : true,
+            autoMultiplier : 5,
             displayTime : 4000
         },
         padLength : 1,
-        timeout : -1,
+        channelTimeout : -1,
+        autoTimeout : -1,
         disabled : false,
         show : function () {
-            var target = s.getTarget();
-            if (s.timeout > -1) {
-                window.clearTimeout(s.timeout);
-                s.timeout = -1;
+            if (s.channelTimeout > -1) {
+                window.clearTimeout(s.channelTimeout);
+                s.channelTimeout = -1;
             }
-            s.timeout = window.setTimeout(function () {
-                s.hide(target);
-            }, s.config.displayTime ? s.config.displayTime : 2000);
+            s.channelTimeout = window.setTimeout(function () {
+                s.hide();
+            }, s.config.displayTime);
         },
-        hide : function (target) {
-            if (s.timeout > -1) {
-                window.clearTimeout(s.timeout);
-                s.timeout = -1;
+        hide : function () {
+            if (s.channelTimeout > -1) {
+                window.clearTimeout(s.channelTimeout);
+                s.channelTimeout = -1;
             }
-            target.innerHTML = '';
+            s.getTarget().innerHTML = '';
         },
         setDisabled : function (disabled) {
             s.disabled = disabled;
             if (s.disabled) {
-                s.hide(s.getTarget());
+                s.hide();
             } else {
-                s.update(s.config);
+                s.update({});
             }
         },
         padChannelDisplay : function (num) {
@@ -43,9 +42,19 @@ define(function () {
             return numStr;
         },
         update : function (osdConfig) {
+            for (var key in osdConfig) {
+                s.config[key] = osdConfig[key];
+            }
             if (s.disabled) return;
-            s.getTarget().innerHTML = '';
-            s.config = osdConfig;
+            if (osdConfig.autoVisible === true) {
+                if (s.autoTimeout > -1) {
+                    window.clearTimeout(s.autoTimeout);
+                    s.autoTimeout = -1;
+                }
+                s.autoTimeout = window.setTimeout(function () {
+                    s.config.autoVisible = false;
+                }, s.config.displayTime);
+            }
             var osdCode = '<div class="gvtv-osd-cn">' + ( s.config.channelNumber ? s.config.channelNumber : '' ) + '</div>';
             if (s.config.autoVisible==true) {
                 osdCode += '<div class="gvtv-osd-rnd">Random ' + ( s.config.autoMultiplier && s.config.autoMultiplier > 0 ? (s.config.autoMultiplier/2).toFixed(1) + 's' : 'off' ) + '</div>';
@@ -53,11 +62,8 @@ define(function () {
             s.getTarget().innerHTML = osdCode;
             s.show();
         },
-        getTarget : function (target) {
-            if (!target) {
-                target = s.config.targetIndex;
-            }
-            return document.getElementById('gvtv-d_' + target).getElementsByClassName('gvtv-osd')[0];
+        getTarget : function () {
+            return document.getElementById('gvtv-osd');
         }
     };
     return s;

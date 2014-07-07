@@ -21,7 +21,7 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
         init : function (dataSource, platform) {
             s.dataSource = dataSource;
             s.platform = platform;
-            document.getElementById(s.targetDivId).innerHTML = '<div id="gvtv-cw"></div><div id="gvtv-mw"><div id="gvtv-mc"></div></div>';
+            document.getElementById(s.targetDivId).innerHTML = '<div id="gvtv-cw"></div><div id="gvtv-osd"></div><div id="gvtv-mw"><div id="gvtv-mc"></div></div></div>';
             s.updateChannels(function (err) {
                 if (err) return;
                 s.currentChannel = Math.round(Math.random() * (s.dataSource.available - 1)) + 1;
@@ -45,7 +45,8 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
             for (var y = 0; y < s.gridSize.y; y += 1) {
                 for (var x = 0; x < s.gridSize.x; x += 1) {
                     var positionCss = 'left:' + cellSizeX*x + '%;' + 'top:' + cellSizeY*y + '%;'
-                    displayCode += '<div id="gvtv-d_' + i + '" style="' + css + fontSizeCss + positionCss + '" class="gvtv-d"><div class="gvtv-c"></div><div class="gvtv-osd"></div></div>';
+                    displayCode += '<div id="gvtv-d_' + i + '" style="' + css + fontSizeCss + positionCss + '" class="gvtv-d">'
+                        + '<div class="gvtv-c"></div></div>';
                     i += 1;
                 }
             }
@@ -59,7 +60,6 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
 
             s.stopAutoTimer();
 
-            osd.show();
             s.currentInput = '';
 
             if (s.keyTimeout>-1) {
@@ -75,7 +75,6 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
             }
 
             osd.update({
-                targetIndex: s.displayIndex,
                 channelNumber : parseInt(s.currentInput)
             });
 
@@ -139,8 +138,6 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
             }
 
             osd.update({
-                targetIndex: s.displayIndex,
-                channelNumber : s.currentChannel,
                 autoVisible : autoVisible,
                 autoMultiplier : s.autoDelayMultiply
             });
@@ -148,8 +145,6 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
         stopAutoTimer : function () {
             if (s.autoTimer>0) {
                 osd.update({
-                    targetIndex: s.displayIndex,
-                    channelNumber : s.currentChannel,
                     autoVisible : false
                 });
                 window.clearInterval(s.autoTimer);
@@ -197,9 +192,7 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
                     document.getElementById(target).getElementsByClassName('gvtv-c')[0].style.backgroundImage = bgData;
                     document.getElementById(target).getElementsByClassName('gvtv-c')[0].style.display = 'block';
                     osd.update({
-                        targetIndex: s.displayIndex,
-                        channelNumber : s.currentChannel,
-                        autoVisible : false
+                        channelNumber : s.currentChannel
                     });
                 });
             });
