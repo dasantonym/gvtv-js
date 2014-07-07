@@ -29,7 +29,7 @@ requirejs(['src/gvtv', 'src/data-file', 'src/platform-nw'], function (gvtv, data
                 });
             });
         } else {
-            fs.readFile(path.resolve('config.default.json'), function (err, data) {
+            fs.readFile(path.resolve('./config.default.json'), function (err, data) {
                 if (err) {
                     console.log('error reading default config', err);
                     return;

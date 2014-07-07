@@ -27,6 +27,7 @@ define(function () {
             s.getTarget().innerHTML = '';
         },
         setDisabled : function (disabled) {
+            console.log(disabled);
             s.disabled = disabled;
             if (s.disabled) {
                 s.hide();

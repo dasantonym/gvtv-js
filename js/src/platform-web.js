@@ -18,6 +18,18 @@ define(function () {
         },
         loadBgImage : function (url, dataHost, callback) {
             callback(null, 'url(' + dataHost + url + ')');
+        },
+        loadSnippet : function (snippet, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status==200) {
+                    callback(null, xhr.responseText);
+                } else if (xhr.readyState == 4) {
+                    callback(new Error('failed to fetch snippet status: ' + xhr.status), null);
+                }
+            };
+            xhr.open('GET', 'js/snippets/' + snippet + '.html', true);
+            xhr.send();
         }
     }
     return s;

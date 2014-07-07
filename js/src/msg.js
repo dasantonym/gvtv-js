@@ -2,25 +2,23 @@ define(function () {
     var s = {
         currentSnippet : null,
         currentAction : null,
+        platform : null,
         toggle : function (snippet, action, callback) {
             if (s.currentSnippet == snippet && document.getElementById('gvtv-mc').innerHTML.length > 0) {
                 s.hide();
                 return callback(null);
             }
-            var xhr = new XMLHttpRequest();
             s.currentSnippet = snippet;
             s.currentAction = action;
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState==4 && xhr.status==200) {
-                    document.getElementById('gvtv-mc').innerHTML = xhr.responseText;
-                    document.getElementById('gvtv-mw').style.display = 'block';
-                    callback(null);
-                } else {
-                    callback(new Error('failed to fetch snippet'));
+            s.platform.loadSnippet(s.currentSnippet, function (err, data) {
+                if (err) {
+                    if (callback) callback(err);
+                    return;
                 }
-            };
-            xhr.open('GET', 'js/snippets/' + s.currentSnippet + '.html', true);
-            xhr.send();
+                document.getElementById('gvtv-mc').innerHTML = data;
+                document.getElementById('gvtv-mw').style.display = 'block';
+                callback(null);
+            });
         },
         hide : function () {
             document.getElementById('gvtv-mw').style.display = 'none';
@@ -32,7 +30,7 @@ define(function () {
             }
         },
         hasContent : function () {
-            return document.getElementById('gvtv-mc').innerHTML.length > 0;
+            return document.getElementById('gvtv-mc').innerHTML.length > 0 || document.getElementById('gvtv-mw').style.display == 'block';
         }
     };
     return s;

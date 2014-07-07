@@ -23,6 +23,17 @@ define(function () {
                 callback(null, 'url(data:image/gif;base64,'+base64Image+')');
             });
         },
+        loadSnippet : function (snippet, callback) {
+            var path = require('path'),
+                fs = require('fs');
+            fs.readFile(path.join(require('dirname').dirname, '..', 'approot', 'js', 'snippets', snippet + '.html'), function (err, data) {
+                if (err) {
+                    console.log('error loading snippet', err);
+                    return callback(err, null);
+                }
+                callback(null, data);
+            });
+        },
         checkVersion : function (msgRef) {
             var http = require('http'),
                 options = {

@@ -21,6 +21,7 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
         init : function (dataSource, platform) {
             s.dataSource = dataSource;
             s.platform = platform;
+            s.msg.platform = platform;
             document.getElementById(s.targetDivId).innerHTML = '<div id="gvtv-cw"></div><div id="gvtv-osd"></div><div id="gvtv-mw"><div id="gvtv-mc"></div></div></div>';
             s.updateChannels(function (err) {
                 if (err) return;
@@ -28,9 +29,6 @@ define(['src/keyboard','src/osd', 'src/util', 'src/msg'], function (keyboard, os
                 s.buildDisplays(function () {
                     s.autoChannel(1, false);
                     keyboard.registerKeys(s.channelCommand);
-                    msg.toggle('intro', null, function () {
-                        osd.setDisabled(msg.hasContent());
-                    });
                 });
             });
         },
