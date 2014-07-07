@@ -56,7 +56,7 @@ define(function () {
                     s.config.autoVisible = false;
                 }, s.config.displayTime);
             }
-            var osdCode = '<div class="gvtv-osd-cn">' + ( s.config.channelNumber ? s.config.channelNumber : '' ) + '</div>';
+            var osdCode = '<div class="gvtv-osd-cn">' + ( s.config.channelNumber ? s.padChannelDisplay(s.config.channelNumber) : '' ) + '</div>';
             if (s.config.autoVisible==true) {
                 osdCode += '<div class="gvtv-osd-rnd">Random ' + ( s.config.autoMultiplier && s.config.autoMultiplier > 0 ? (s.config.autoMultiplier/2).toFixed(1) + 's' : 'off' ) + '</div>';
             }
